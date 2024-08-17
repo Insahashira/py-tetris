@@ -24,7 +24,7 @@ def add(block, positionX, positionY):
     for i in range(l):
         for j in range(l):
             if block[i][j] == "[]":
-                if availabilityChecker(positionY, positionX):
+                if availabilityChecker(i+positionY, j+positionX):
                     array[i+positionY][j+positionX] = "[]"
 
 def availabilityChecker(positionY, positionX):
@@ -61,7 +61,7 @@ def arrayShifter(row): #moves all the lines 1 below after the line gets deleted
             temp[j] = array[i-1][j]
             array[i][j] = temp[j]
 
-def printer():#for terminal debug
+def printer(): #for terminal debug
     for i in range(20):
         print(array[i])
     print("------------------------------")

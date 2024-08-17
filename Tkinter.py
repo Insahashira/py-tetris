@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font
 import Matrix
 import Logic
 
@@ -7,13 +8,15 @@ base = tk.Tk()
 def keyDetector(event):
     if(event.keysym == 'a'):
         Logic.moveLeft()
-        update()
     elif(event.keysym == 'd'):
         Logic.moveRight()
-        update()
     elif(event.keysym == 's'):
         Logic.moveDown()
-        update()
+    elif(event.keysym == 'q'):          
+        Logic.rotateLeft()
+    elif(event.keysym == 'e'):
+        Logic.rotateRight()
+    update()
 
 def update():
     mainscreen.config(text=Matrix.display())

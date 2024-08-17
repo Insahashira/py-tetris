@@ -16,9 +16,9 @@ class Blocks(metaclass=abc.ABCMeta):
             pass
         
     def rotateRight(self):
-        if(type == 0):
+        if(self.type == 0):
             self.rotatorR()
-        elif(type == 1):
+        elif(self.type == 1):
             self.rotator()
         else: 
             pass
