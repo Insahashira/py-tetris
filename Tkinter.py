@@ -19,6 +19,7 @@ def keyDetector(event):
     update()
 
 def update():
+    Matrix.lineChecker()
     mainscreen.config(text=Matrix.display())
 
 base.title("Tetris")
