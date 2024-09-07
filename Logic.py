@@ -27,14 +27,14 @@ def marginCal(type):
                 if arr[l-i-1][j] == "[]": #goes down vertical
                     return l-i-1
                 
-def depthMeasure(): #rn for down side
+def depthMeasure(): #rn for down side, how much the actual block is above the level -1 is none
     l = block.size()
     arr = block.array()
     depth = [-1 for _ in range(l)]
     for i in range(l):
         for j in range(l):
-            if arr[l-j-1][i] == "[]":
-                depth[i] = l-j-1
+            if arr[j][i] == "[]":
+                depth[i] = j
                 break
     return depth
     
@@ -42,10 +42,11 @@ def bottomDetector():
     l = block.size()
     depth = depthMeasure()
     for i in range(l):
-        if Matrix.availabilityChecker(posY + depth[i]+1, posX + i):
-           pass
-        else:
-            return True 
+        if depth[i] != -1:
+            if Matrix.availabilityChecker(posY - depth[i] + 1, posX + i):
+                pass
+            else:
+                return True 
     return False
 
 def spawn(block):
@@ -78,10 +79,10 @@ def moveRight():
 def moveDown():
     global posX
     global posY
-    posYLimit = marginCal(2)
     if bottomDetector():
+        Matrix.lineChecker()
         spawn(blockSelector())
-    elif posY + posYLimit < 19:
+    elif posY < 20:
         Matrix.delete(block.array(), posX, posY)
         posY += 1
         Matrix.add(block.array(), posX, posY)
