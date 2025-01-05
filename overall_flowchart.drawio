@@ -74,10 +74,10 @@
         <mxCell id="DLD64usyEXqExC05i04k-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="DLD64usyEXqExC05i04k-52" source="DLD64usyEXqExC05i04k-54" target="DLD64usyEXqExC05i04k-55">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="DLD64usyEXqExC05i04k-54" value="X, Y position pointer" style="whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="DLD64usyEXqExC05i04k-52">
+        <mxCell id="DLD64usyEXqExC05i04k-54" value="X, Y position of current block" style="whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="DLD64usyEXqExC05i04k-52">
           <mxGeometry x="110" y="40" width="80" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="DLD64usyEXqExC05i04k-55" value="Overlap pre-placed block with current dropping block on pointer" style="whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="DLD64usyEXqExC05i04k-52">
+        <mxCell id="DLD64usyEXqExC05i04k-55" value="Overlap pre-placed block with current dropping block" style="whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="DLD64usyEXqExC05i04k-52">
           <mxGeometry x="40" y="170" width="120" height="90" as="geometry" />
         </mxCell>
       </root>
