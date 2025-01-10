@@ -4,9 +4,10 @@ import abc
 class Blocks(metaclass=abc.ABCMeta):
     position = 0
 
-    def __init__(self, type, arr):
+    def __init__(self, type, arr, shape):
         self.arr = arr
         self.type = type
+        self.shape = shape
 
     def rotateLeft(self):
         if self.type == 0:
@@ -29,7 +30,7 @@ class Blocks(metaclass=abc.ABCMeta):
             pass
 
     def flip(self):
-        if type == 0:
+        if self.type == 0:
             self.rotatorL()
             self.rotatorL()
 
@@ -44,7 +45,7 @@ class Blocks(metaclass=abc.ABCMeta):
 
     def rotatorL(self):
         l = len(self.arr)
-        temp = [["   " for _ in range(l)] for _ in range(l)]
+        temp = [["  " for _ in range(l)] for _ in range(l)]
 
         for i in range(l):
             for j in range(l):
@@ -54,7 +55,7 @@ class Blocks(metaclass=abc.ABCMeta):
 
     def rotatorR(self):
         l = len(self.arr)
-        temp = [["   " for _ in range(l)] for _ in range(l)]
+        temp = [["  " for _ in range(l)] for _ in range(l)]
 
         for i in range(l):
             for j in range(l):
@@ -68,38 +69,41 @@ class Blocks(metaclass=abc.ABCMeta):
     def array(self):
         return self.arr
 
+    def __eq__(self, other):
+        return self.shape == other
+
 
 class TBlock(Blocks):
     def __init__(self):
-        super().__init__(0, [["   ", "[]", "   "], ["[]", "[]", "[]"], ["   ", "   ", "   "]])
+        super().__init__(0, [["  ", "[]", "  "], ["[]", "[]", "[]"], ["  ", "  ", "  "]], "T")
 
 
 class JBlock(Blocks):
     def __init__(self):
-        super().__init__(0, [["   ", "[]", "   "], ["   ", "[]", "   "], ["[]", "[]", "   "]])
+        super().__init__(0, [["  ", "[]", "  "], ["  ", "[]", "  "], ["[]", "[]", "  "]], "J")
 
 
 class LBlock(Blocks):
     def __init__(self):
-        super().__init__(0, [["   ", "[]", "   "], ["   ", "[]", "   "], ["   ", "[]", "[]"]])
+        super().__init__(0, [["  ", "[]", "  "], ["  ", "[]", "  "], ["  ", "[]", "[]"]], "L")
 
 
 class IBlock(Blocks):
     def __init__(self):
-        super().__init__(1, [["   ", "   ", "   ", "[]"], ["   ", "   ", "   ", "[]"], ["   ", "   ", "   ", "[]"],
-                             ["   ", "   ", "   ", "[]"]])
+        super().__init__(1, [["  ", "  ", "  ", "[]"], ["  ", "  ", "  ", "[]"], ["  ", "  ", "  ", "[]"],
+                             ["  ", "  ", "  ", "[]"]], "I")
 
 
 class SBlock(Blocks):
     def __init__(self):
-        super().__init__(1, [["   ", "[]", "   "], ["   ", "[]", "[]"], ["   ", "   ", "[]"]])
+        super().__init__(1, [["  ", "[]", "  "], ["  ", "[]", "[]"], ["  ", "  ", "[]"]], "S")
 
 
 class ZBlock(Blocks):
     def __init__(self):
-        super().__init__(1, [["   ", "[]", "   "], ["[]", "[]", "   "], ["[]", "   ", "   "]])
+        super().__init__(1, [["  ", "[]", "  "], ["[]", "[]", "  "], ["[]", "  ", "  "]], "Z")
 
 
 class SqBlock(Blocks):
     def __init__(self):
-        super().__init__(2, [["[]", "[]"], ["[]", "[]"]])
+        super().__init__(2, [["[]", "[]"], ["[]", "[]"]], "Sq")

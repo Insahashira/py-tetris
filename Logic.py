@@ -2,38 +2,72 @@ import copy
 import Matrix
 import Blocks
 import random
+import time
 
 
-posX, posY, block, prevBlock = 0, 0, Blocks.Blocks(None, None), -1
-matrixPlaced = Matrix.Matrix() #matrix to record already placed blocks
-matrixForDisplay = Matrix.Matrix() #matrix for displaying (including the current manipulated block)
+posX, posY, block = 0, 0, Blocks.Blocks(None, None, None)
+prevBlock, selected, selectedCount = -1, [False for _ in range(7)], 0
+queue = []
+savedQueue, prevQueue = [], []
+matrix = Matrix.Matrix() #matrix for displaying (including the current manipulated block)
 
 
-def blockSelector(): #select the blocks to spawn. If same block is spawned in a row, select to block again
-    global block, prevBlock
+def block_selector(): #select the blocks to spawn. If same block is spawned in a row, select to block again
+    global block, prevBlock, selected, selectedCount
+
+    if selectedCount == 7:
+        selected = [False for _ in range(7)]
+        selectedCount = 0
 
     blocks = [Blocks.TBlock(), Blocks.JBlock(), Blocks.LBlock(), Blocks.IBlock(), Blocks.SBlock(), Blocks.ZBlock(),
               Blocks.SqBlock()]
     blockIdx = random.randrange(0, 7)
+
+    if selected[blockIdx]:
+        return block_selector()
+
+    selected[blockIdx] = True
+    selectedCount += 1
+
     block = blocks[blockIdx]
 
-    if prevBlock != -1:
-        if blockIdx == prevBlock:
-            return blockSelector()
-
-    prevBlock = blockIdx
     return block
 
 
-def leftMarginCal():
+def spawn(block): #spawn the block and mark it on matrixForDisplay
+    global posX, posY
+    l = block.size()
+    posX = 6 - l
+    posY = 1 - l
+
+    # todo: future code for game over
+    # for i in range(l):
+    #     for j in range(l):
+    #         if block.array()[i][j] == "[]" and matrixPlaced[posY + i][posX + j]:
+    #             return Something
+
+    # matrix.add(block, posX, posY)
+
+
+def spawner():
+    global block
+    while len(queue) < 4:
+        temp = block_selector()
+        queue.append(temp)
+
+    block = queue.pop(0)
+    spawn(block)
+
+
+def left_margin_cal():
     return marginCal(0)
 
 
-def rightMarginCal():
+def right_margin_cal():
     return marginCal(1)
 
 
-def downMarginCal():
+def down_margin_cal():
     return marginCal(2)
 
 
@@ -71,85 +105,75 @@ def depthMeasure(): #check availability for downside, how much the actual block 
     return depth
 
 
-def spawn(block): #spawn the block and mark it on matrixForDisplay
-    global posX, posY
-    l = block.size()
-    posX = 6 - l
-    posY = 1 - l
-
-    # todo: future code for game over
-    # for i in range(l):
-    #     for j in range(l):
-    #         if block.array()[i][j] == "[]" and matrixPlaced[posY + i][posX + j]:
-    #             return Something
-
-    matrixForDisplay.add(block.array(), posX, posY)
-
-
 def moveLeft():
     global posX, posY
-    posXLimit = leftMarginCal()
+    posXLimit = left_margin_cal()
 
     if posX + posXLimit > 0 and validityChecker(posX-1, posY, block):
-        matrixForDisplay.delete(block.array(), posX, posY)
         posX -= 1
-        matrixForDisplay.add(block.array(), posX, posY)
-
 
 def moveRight():
     global posX, posY
-    posXLimit = rightMarginCal()
+    posXLimit = right_margin_cal()
 
     if posX + posXLimit < 9 and validityChecker(posX+1, posY, block):
-        matrixForDisplay.delete(block.array(), posX, posY)
         posX += 1
-        matrixForDisplay.add(block.array(), posX, posY)
 
 
 def moveDown():
     global posX, posY, block
 
     if not validityChecker(posX, posY + 1, block):
-        matrixPlaced.add(block.array(), posX, posY)
-        matrixPlaced.lineChecker()
-        matrixForDisplay.lineChecker()
-        spawn(blockSelector())
-        return
+        matrix.add(block, posX, posY)
+        matrix.lineChecker()
+        spawner()
 
-    matrixForDisplay.delete(block.array(), posX, posY)
-    posY += 1
-    matrixForDisplay.add(block.array(), posX, posY)
+    else:
+        posY += 1
 
 
 def rotateLeft():
-    global posX, posY, block
-
-    temp = copy.deepcopy(block)
-    temp.rotateLeft()
-
-    if not validityChecker(posX, posY, temp):
-        blockShifter(temp)
-        return
-
-    matrixForDisplay.delete(block.array(), posX, posY)
-    block = temp
-    matrixForDisplay.add(block.array(), posX, posY)
+    rotateHelper(0)
 
 
 def rotateRight():
+    rotateHelper(1)
+
+
+def flip():
+    rotateHelper(2)
+
+
+def rotateHelper(type):
     global posX, posY, block
 
     temp = copy.deepcopy(block)
-    temp.rotateRight()
+
+    if type == 0:
+        temp.rotateLeft()
+    elif type == 1:
+        temp.rotateRight()
+    else:
+        temp.flip()
 
     if not validityChecker(posX, posY, temp):
-        blockShifter(temp)
+        block_shifter(temp)
         return
 
-    matrixForDisplay.delete(block.array(), posX, posY)
     block = temp
-    matrixForDisplay.add(block.array(), posX, posY)
 
+def drop():
+    global posX, posY, block
+    tempY = posY
+
+    while validityChecker(posX, tempY, block):
+        tempY += 1
+
+    tempY -= 1
+    posY = tempY
+    matrix.add(block, posX, posY)
+    matrix.lineChecker()
+    spawner()
 
 def validityChecker(x, y, blk): #checks whether the block can exist in certain position
     l = blk.size()
@@ -159,11 +183,8 @@ def validityChecker(x, y, blk): #checks whether the block can exist in certain p
 
     for i in range(l):
         for j in range(l):
-            if y + i > 19:
-                if blk.array()[i][j] == "[]":
-                    return False
-
-                continue
+            if y + i > 19 and blk.array()[i][j] == "[]":
+                return False
 
             elif x + j < 0 or x + j > 9:
                 if blk.array()[i][j] == "[]":
@@ -171,30 +192,119 @@ def validityChecker(x, y, blk): #checks whether the block can exist in certain p
 
                 continue
 
-            elif blk.array()[i][j] == "[]" and matrixPlaced.arraySelector(y + i, x + j) == "[]":
+            elif blk.array()[i][j] == "[]" and matrix.arraySelector(y + i, x + j) == "[]":
                 return False
 
     return True
 
 
-def blockShifter(temp):
+def block_shifter(temp):
     global posX, posY, block
     l = temp.size()
 
     if posX < 0:
         for l in range(block.size()):
             if validityChecker(posX + l, posY, temp):
-                matrixForDisplay.delete(block.array(), posX, posY)
-                posX = posX + l
+                posX += l
                 block = temp
-                matrixForDisplay.add(block.array(), posX, posY)
                 return
 
     elif posX + l > 9:
         for l in range(block.size()):
             if validityChecker(posX - l, posY, temp):
-                matrixForDisplay.delete(block.array(), posX, posY)
-                posX = posX - l
+                posX -= l
                 block = temp
-                matrixForDisplay.add(block.array(), posX, posY)
                 return
+
+
+def display(): #converts the current matrix into string for displaying
+    result = ""
+    for i in range(3):
+        result += "|"
+        for j in range(10):
+
+            if posX <= j < posX + block.size() and posY <= i - 3 < posY + block.size() and block.array()[i - posY - 3][j - posX] == "[]":
+                result += block.array()[i - posY - 3][j - posX]
+            else:
+                result += matrix.subArray[i][j]
+
+            if j == 9:
+                result += "|"
+
+        result += "\n"
+    result += "|--------------------|\n"
+    for i in range(20):
+        result += "|"
+        for j in range(10):
+
+            if posX <= j < posX + block.size() and posY <= i < posY + block.size() and block.array()[i - posY][j - posX] == "[]":
+                result += "[]"
+            else:
+                result += matrix.array[i][j]
+
+            if j == 9:
+                result += "|"
+
+        result += "\n"
+    result += "======================\n"
+    return result
+
+
+def next_screen_display():
+    result = "---------\nN E X T\n---------\n"
+
+
+    for q in queue:
+        if len(q.array()) == 2:
+            result += "\n"
+        for i in range(len(q.array())):
+            for j in range(len(q.array())):
+                result += q.array()[i][j]
+            result += "\n"
+        if len(q.array()) != 4:
+            result += "\n"
+
+    result += "\n"
+
+    return result
+
+
+def aux_screen_display():
+    result = "---------\nT E S T\n---------\n"
+    result += "Lines: " + matrix.getLineCount() + "\n"
+    result += "Time: " + "{:.2f}".format(time.time())
+
+    return result
+
+
+def save_block():
+    global block
+
+    if len(prevQueue) > 1:
+        if prevQueue[0] == block:
+            return
+
+    prevQueue.append(block)
+    if len(savedQueue) == 0:
+        savedQueue.append(block)
+        spawner()
+
+    else:
+        savedQueue.append(block)
+        block = savedQueue.pop(0)
+        spawn(block)
+
+    if len(prevQueue) > 2:
+        prevQueue.pop(0)
+
+
+start = 0
+
+def time_start():
+    global start
+    start = time.time()
+
+def time_measure():
+    if time.time() - start > 1:
+        moveDown()
+        time_start()
